@@ -1,0 +1,8 @@
+# Ignore everything in this folder
+*
+
+# But keep this .gitignore file
+!.gitignore
+
+# And keep only this python file
+!ecg_model.py
