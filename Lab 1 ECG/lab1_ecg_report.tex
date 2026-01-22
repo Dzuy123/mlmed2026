@@ -1,0 +1,75 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+\title{ECG Heartbeat Classification}
+\author{Pham Dinh Duy}
+\date{January 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This work studies automated ECG heartbeat classification using deep learning.
+A one-dimensional convolutional neural network is trained to categorize heartbeats into five clinically relevant classes.
+
+\section{Dataset}
+The ECG Heartbeat Categorization dataset is derived from the PhysioNet MIT-BIH Arrhythmia and PTB Diagnostic ECG databases.
+Each sample represents a single segmented heartbeat of fixed length (188 samples).
+MIT-BIH data are used for multi-class classification, while PTB data are used for normal versus abnormal waveform comparison.
+
+\subsection{Class distribution (MIT-BIH train)}
+The training data are highly imbalanced, with normal beats has the most counts.
+
+\begin{center}
+\begin{tabular}{l r}
+\toprule
+Class & Count \\
+\midrule
+N (0) & 72471 \\
+S (1) & 2223 \\
+V (2) & 5788 \\
+F (3) & 641 \\
+Q (4) & 6431 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Model}
+Lightweight 1D CNN is used, consisting of two convolutional blocks with batch normalization, ReLU activation, and max pooling.
+The extracted features are flattened and passed through a fully connected classifier.
+Class imbalance is handled using weighted cross-entropy loss.
+
+\section{Training Setup}
+The model is trained for 15 epochs using the Adam optimizer with a learning rate of $10^{-3}$ and batch size 256.
+Training and evaluation are performed on the MIT-BIH train and test splits.
+
+\section{Results}
+
+The CNN model was trained for 15 epochs on the MIT-BIH dataset using class-weighted cross-entropy loss.
+Training accuracy increased steadily, while validation accuracy stabilized after approximately 8 epochs.
+
+The final test accuracy achieved was \textbf{95.31\%}.
+
+\subsection{Training}
+Training and validation loss decreased gradually, suggesting effective optimization.
+There were some small fluctuations in validation loss in later epochs, but no overfitting occurred.
+Accuracy converges after mid-training epochs.
+
+\subsection{Classification Performance}
+Table-based metrics show strong performance on the dominant normal class (N) and high recall for class Q.
+Precision for minority arrhythmia classes is lower, reflecting the strong class imbalance in the dataset.
+
+\begin{itemize}
+    \item Normal beats (N) achieved high precision and recall.
+    \item Lesser count classes show less precision due to less sample counts.
+\end{itemize}
+
+
+
+
+
+
+\end{document}
