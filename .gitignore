@@ -1,0 +1,13 @@
+# Ignore everything in this folder
+*
+
+# But keep this .gitignore file
+!.gitignore
+
+# Keep the folers
+!Lw2_ultrasound
+
+# And keep only this python file
+!ecg_model.py
+!lab1_ecg_report.tex
+!Lw2_ultrasound/lw2_ultra.py
