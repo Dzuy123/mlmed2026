@@ -1,0 +1,74 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{geometry} \geometry{a4paper, margin=1in} \usepackage{graphicx} \usepackage{amsmath} \usepackage{booktabs}
+
+\title{Estimation of Fetal Head Circumference from Ultrasound Images Using a Convolutional Neural Network} \author{} \date{}
+
+\begin{document} \maketitle
+
+\begin{abstract} This work presents a simple deep learning approach to estimate fetal head circumference from ultrasound images. The method uses images from the HC18 dataset and a convolutional neural network trained to directly predict the head circumference value in millimeters. The goal is to study how image features alone can be used to learn this measurement. The model architecture, training procedure, and results are explained step by step based only on the implemented code. \end{abstract}
+
+\section{Introduction} Fetal head circumference is commonly estimated from ultrasound images by first segmenting the fetal head and then computing the perimeter of the segmented contour. The HC18 challenge is designed around this segmentation-based pipeline. In contrast, the implementation in this work follows a different strategy. A convolutional neural network is trained to directly predict the head circumference value from the image without explicitly performing segmentation.
+
+This difference between the dataset design and the implemented method is important. The model does not use the provided head annotations to compute the circumference. Instead, it learns a direct regression from image intensity patterns to a numerical measurement. This reframing is intentional and reflects an exploration of whether segmentation can be bypassed in favor of an end-to-end regression approach.
+
+\section{Dataset and Preprocessing}
+
+The HC18 dataset consists of grayscale ultrasound images of fetal heads. Each image is associated with a pixel size and a ground truth head circumference measured in millimeters. A total of 999 images are used for training. A separate test set is provided without ground truth values.
+
+All images are loaded in grayscale format. Each image is resized to a fixed resolution of $224 \times 224$ pixels. This ensures that all inputs have the same shape and reduces memory usage. Pixel values are normalized by dividing by 255, so that they lie between 0 and 1. This normalization helps stabilize training.
+
+Although annotation files are available in the dataset, they are not used during training. The annotations are loaded but ignored. The model only uses the raw ultrasound image as input and the head circumference value as the target.
+
+\section{Model Architecture} A sequential convolutional neural network is used. The model takes an input image of size $224 	imes 224 	imes 1$. Unlike segmentation networks such as U-Net, this architecture does not include an encoder--decoder structure or pixel-wise output. The network is designed for global regression rather than dense prediction.
+
+The architecture is composed of the following layers:
+
+A first convolutional layer with 32 filters of size $3 	imes 3$ and ReLU activation. This layer extracts low-level visual features such as edges and intensity transitions.
+
+A max pooling layer with pool size $2 	imes 2$. This reduces spatial resolution and enforces translation invariance.
+
+A second convolutional layer with 64 filters and ReLU activation. This layer captures more complex texture patterns present in ultrasound images.
+
+A second max pooling layer for further spatial reduction. 
+
+A third convolutional layer with 128 filters and ReLU activation. This layer aggregates higher-level structural information related to the fetal head shape. 
+
+A third max pooling layer. 
+
+A flatten layer that converts the feature maps into a one-dimensional vector. At this stage, all spatial information is compressed into a global representation.
+
+A fully connected dense layer with 128 units and ReLU activation. This layer learns a nonlinear mapping between extracted features and the target measurement. 
+
+A final dense layer with one output neuron that produces the predicted head circumference value. 
+
+Because the model outputs a single scalar value, it cannot produce a head contour or mask. Any notion of shape or boundary is learned implicitly through regression. This design choice highlights the mismatch between the segmentation-based nature of the HC18 dataset and the regression-based modeling approach used here.
+
+\section{Training Procedure}
+
+The model is trained for 10 epochs with a batch size of 32. The training data is split automatically, with 80% used for training and 20% used for validation. During training, the model updates its weights to minimize the mean squared error between predicted and true head circumference values.
+
+The training loss decreases steadily over epochs, indicating that the model is learning meaningful features from the images. The validation error remains higher than the training error, which suggests limited generalization and possible overfitting. No data augmentation or regularization techniques are applied in this implementation.
+
+\section{Results} During training, model performance is evaluated using mean squared error (MSE) as the loss function and mean absolute error (MAE) as an additional metric. MAE measures the average absolute difference between the predicted head circumference and the ground truth value, expressed directly in millimeters.
+
+Across epochs, the training MAE decreases to values around 20--25 mm. This indicates that, on average, the model predictions differ from the true head circumference by approximately 2--2.5 cm on the training data. The validation MAE remains much higher, typically in the range of 90--120 mm. This corresponds to an average error of 9--12 cm on unseen validation images.
+
+The large gap between training and validation MAE suggests limited generalization. While the network learns to fit the training samples, it struggles to accurately predict head circumference for new images. This behavior is consistent with the regression-based design and the absence of explicit spatial or anatomical constraints.
+
+After training, the model is applied to the test set. Since ground truth head circumference values are not provided for the test data, quantitative evaluation using MAE is not possible at this stage. The model outputs predicted values only, which are saved for later analysis.
+
+\section{Discussion} This work highlights a clear methodological mismatch. The HC18 dataset is designed for segmentation-driven circumference estimation, yet the implemented model performs direct regression. While this simplifies the pipeline, it also removes explicit spatial supervision.
+
+To improve training stability, the head circumference targets are normalized using the mean and standard deviation of the training set. Normalization reduces the numerical scale of the regression target and allows the optimizer to converge more reliably. For reporting, the mean absolute error is converted back to millimeters, which preserves physical interpretability. This step improves optimization behavior but does not resolve the absence of geometric constraints.
+
+Dropout regularization is applied after the fully connected layer to reduce overfitting. Given the large number of trainable parameters relative to the dataset size, dropout helps limit reliance on specific training samples. Although this reduces the gap between training and validation error, it cannot compensate for the lack of explicit boundary modeling.
+
+Overall, normalization and dropout improve numerical stability and generalization, but the dominant limitation remains the regression-based formulation. Without segmentation, the model cannot enforce anatomical consistency between the image content and the predicted head circumference.
+
+\section{Conclusion}
+
+A basic convolutional neural network was implemented to estimate fetal head circumference from ultrasound images in the HC18 dataset. The method uses image preprocessing, convolutional feature extraction, and regression through fully connected layers. While the model learns from the data, the results suggest that more structured use of annotations and improved model design would be needed for reliable clinical performance.
+
+\end{document}
+1
